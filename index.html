@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barbearia - Sistema de Fila</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .queue-item {
+            transition: all 0.3s ease;
+        }
+        
+        .queue-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .current-client {
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1D4ED8, #1E40AF);
+            transform: translateY(-1px);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10B981, #059669);
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-1px);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+        }
+        
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #D97706, #B45309);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-cut text-3xl text-blue-600"></i>
+                    <h1 class="text-2xl font-bold text-gray-800">Barbearia Premium</h1>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-gray-600">Sistema de Fila</p>
+                    <p class="text-xs text-gray-500" id="current-time"></p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Painel de Controle -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-plus-circle text-blue-600 mr-2"></i>
+                        Adicionar Cliente
+                    </h2>
+                    
+                    <form id="add-client-form" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nome do Cliente</label>
+                            <input type="text" id="client-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Digite o nome..." required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Corte</label>
+                            <select id="haircut-type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                                <option value="">Selecione o corte</option>
+                                <option value="Corte Simples">Corte Simples</option>
+                                <option value="Corte + Barba">Corte + Barba</option>
+                                <option value="Barba">Apenas Barba</option>
+                                <option value="Corte Degradê">Corte Degradê</option>
+                                <option value="Corte Social">Corte Social</option>
+                                <option value="Personalizado">Personalizado</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Valor (R$)</label>
+                            <input type="number" id="haircut-cost" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Digite o valor..." min="1" step="0.01" required>
+                        </div>
+                        
+                        <button type="submit" class="w-full btn-primary text-white py-3 px-4 rounded-lg font-medium">
+                            <i class="fas fa-plus mr-2"></i>
+                            Adicionar à Fila
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Estatísticas -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">📊 Estatísticas do Dia</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Atendimentos:</span>
+                            <span class="font-bold text-blue-600" id="total-served">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Na Fila:</span>
+                            <span class="font-bold text-orange-600" id="queue-count">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Faturamento:</span>
+                            <span class="font-bold text-green-600" id="total-revenue">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fila de Atendimento -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                            <i class="fas fa-users text-blue-600 mr-2"></i>
+                            Fila de Atendimento
+                        </h2>
+                        <button id="clear-queue" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                            <i class="fas fa-trash mr-1"></i>
+                            Limpar Fila
+                        </button>
+                    </div>
+
+                    <div id="queue-container" class="space-y-4">
+                        <div class="text-center py-12 text-gray-500">
+                            <i class="fas fa-clock text-4xl mb-4"></i>
+                            <p class="text-lg">Nenhum cliente na fila</p>
+                            <p class="text-sm">Adicione clientes para começar o atendimento</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast de Notificação -->
+    <div id="toast" class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 z-50">
+        <div class="flex items-center">
+            <i class="fas fa-check-circle mr-2"></i>
+            <span id="toast-message">Operação realizada com sucesso!</span>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
