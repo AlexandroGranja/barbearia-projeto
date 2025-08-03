@@ -253,10 +253,10 @@ export default function QueueSystem({ onGoToAdmin }) {
               </div>
               <button
                 onClick={onGoToAdmin}
-                className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                className="flex items-center px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors font-medium"
               >
                 <Settings className="w-4 h-4 mr-2" />
-                Admin
+                Painel Admin
               </button>
             </div>
           </div>

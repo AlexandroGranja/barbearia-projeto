@@ -117,6 +117,12 @@ export default function AdminPanel({ session, onLogout }) {
                 Olá, {session.name}
               </span>
               <button
+                onClick={() => window.location.reload()}
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+              >
+                Ver Fila
+              </button>
+              <button
                 onClick={onLogout}
                 className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
               >
